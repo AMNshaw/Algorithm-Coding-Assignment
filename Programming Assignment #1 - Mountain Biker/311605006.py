@@ -34,21 +34,20 @@ class App:
         return minDist
 
     def stripClosest(self, s, delta):
+        min = delta
         stripSize = len(s)
-        quickSort(s, 0, stripSize-1, 'y')
+        quickSort(s, 0, stripSize-1, 1)
         for i in range(stripSize):
             for j in range(i+1, stripSize):
                 if(abs(s[i][1] - s[j][1]) >= delta):
                     break
                 dist = computeDistance(s[i], s[j])
                 if dist < delta:
-                    minDist = dist
-                    return minDist
-                else:
-                    return delta
+                    min = dist
+        return min
 
 def bruteForce(pt, n):
-    shortest = computeDistance(pt[0], pt[1])
+    shortest = float("inf")
     for i in range(n - 1):
         for j in range(i+1, n):
             distance = computeDistance(pt[i], pt[j])
@@ -58,10 +57,7 @@ def bruteForce(pt, n):
 
 
 def partition(pt, low, high, axis):
-        if axis=='x':
-            axis = 0
-        elif axis=='y':
-            axis = 1
+
         pivot = pt[high][axis]
         
         i = low - 1
@@ -91,8 +87,9 @@ def main():
         ptNum = int(input())
         app = App(ptNum)
         app.inputCoordinate()
-        quickSort(app.coordinate, 0, ptNum-1, 'x')
+        quickSort(app.coordinate, 0, ptNum-1, 0)
         shortestArr.append(app.devideTillBase(app.coordinate, ptNum))
+        #shortestArr.append(bruteForce(app.coordinate, ptNum))
     for i in range(testNum):
         print(shortestArr[i])
     
