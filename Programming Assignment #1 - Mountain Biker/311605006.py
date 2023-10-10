@@ -36,7 +36,8 @@ class App:
     def stripClosest(self, s, delta):
         min = delta
         stripSize = len(s)
-        quickSort(s, 0, stripSize-1, 1)
+        s = sorted(s, key=lambda pts: pts[1])
+        ##quickSort(s, 0, stripSize-1, 1)
         for i in range(stripSize):
             for j in range(i+1, stripSize):
                 if(abs(s[i][1] - s[j][1]) >= delta):
@@ -87,8 +88,9 @@ def main():
         ptNum = int(input())
         app = App(ptNum)
         app.inputCoordinate()
-        quickSort(app.coordinate, 0, ptNum-1, 0)
-        shortestArr.append(app.devideTillBase(app.coordinate, ptNum))
+        #quickSort(app.coordinate, 0, ptNum-1, 0)
+        sorted_pts = sorted(app.coordinate, key=lambda pt: pt[0])
+        shortestArr.append(app.devideTillBase(sorted_pts, ptNum))
         #shortestArr.append(bruteForce(app.coordinate, ptNum))
     for i in range(testNum):
         print(shortestArr[i])
