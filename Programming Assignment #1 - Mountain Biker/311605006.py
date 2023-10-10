@@ -1,99 +1,69 @@
 import math
 
-
-class App:
-
-    def __init__(self, number):
-        self.num = number
-        self.coordinate = [[0, 0] for _ in range(self.num)]
-    
-    def inputCoordinate(self):
-        for i in range(self.num):
-            input_string = input()
-            try:
-                self.coordinate[i][0] = float(input_string.split()[0])
-                self.coordinate[i][1] = float(input_string.split()[1])
-            except ValueError:
-                print("Invalid input")
-        # print("coordinates:\n", self.coordinate)
-        # print(computeDistance(self.coordinate[0], self.coordinate[1]))
-
-    def devideTillBase(self, pt, n):
-        if n <= 3:
-            return bruteForce(pt, n)
-        mid = n//2
-        midPt = pt[mid]
-        deltaL = self.devideTillBase(pt, mid)
-        deltaR = self.devideTillBase(pt[mid:], n-mid)
-        delta = min(deltaL, deltaR)
-        s = []
-        for i in range(n):
-            if abs(pt[i][0] - midPt[0]) < delta:
-                s.append(pt[i])
-        minDist = self.stripClosest(s, delta)
-        return minDist
-
-    def stripClosest(self, s, delta):
-        min = delta
-        stripSize = len(s)
-        s = sorted(s, key=lambda pts: pts[1])
-        ##quickSort(s, 0, stripSize-1, 1)
-        for i in range(stripSize):
-            for j in range(i+1, stripSize):
-                if(abs(s[i][1] - s[j][1]) >= delta):
-                    break
-                dist = computeDistance(s[i], s[j])
-                if dist < delta:
-                    min = dist
-        return min
-
-def bruteForce(pt, n):
-    shortest = float("inf")
-    for i in range(n - 1):
-        for j in range(i+1, n):
-            distance = computeDistance(pt[i], pt[j])
-            if distance < shortest:
-                shortest = distance
-    return shortest
-
-
-def partition(pt, low, high, axis):
-
-        pivot = pt[high][axis]
-        
-        i = low - 1
-        for j in range(low, high):
-            if pt[j][axis] < pivot:
-                i = i+1
-                (pt[i], pt[j]) = (pt[j], pt[i])
-
-        (pt[i+1], pt[high]) = (pt[high], pt[i + 1])
-
-        return i+1
-
-def quickSort(pt, low, high, axis):
-
-    if low < high:
-        p = partition(pt, low, high, axis)
-        quickSort(pt, low, p - 1, axis)
-        quickSort(pt, p+1, high, axis)
+def closest(points):
+    Px = sorted(points, key = lambda point: point[0])
+    Py = sorted(points, key = lambda point: point[1])
+    return recursion(Px, Py)
 
 def computeDistance(pt1, pt2):
     return math.sqrt((pt1[0] - pt2[0]) ** 2 + (pt1[1] - pt2[1]) ** 2)
 
-def main():
+def recursion(Px, Py):
+    n = len(Px)
+    if(n <= 3):
+        return bruteForce(Px)
+    else:
+        midPt = Px[n//2]
+        Lx = Px[:n//2]
+        Rx = Px[n//2:]
+        Ly = []
+        Ry = []
+        for pt in Py:
+            Ly.append(pt) if (pt[0] <= midPt[0]) else Ry.append(pt)
+        
+        p1_L, p2_L, delta_L = recursion(Lx, Ly)
+        p1_R, p2_R, delta_R = recursion(Rx, Ry)
+        p1, p2, delta = (p1_L, p2_L, delta_L) if (delta_L < delta_R) else (p1_R, p2_R, delta_R)
+        s = []
+        for pt in Py:
+            if(abs(pt[0] - midPt[0]) < delta):
+                s.append(pt)
+        stripSize = len(s)
+        for i in range(stripSize):
+            for j in range(i+1, min(i+7, stripSize)):
+                if(abs(s[i][1] - s[j][1]) < delta):
+                    d = computeDistance(s[i], s[j])
+                    if(d < delta):
+                        p1, p2, delta = (s[i], s[j], d)
+        return p1, p2, delta
+
+def bruteForce(P):
+    n = len(P)
+    p1 = None
+    p2 = None
+    shortest = float("inf")
+    for i in range(n - 1):
+        for j in range(i+1, n):
+            distance = computeDistance(P[i], P[j])
+            if distance < shortest:
+                shortest = distance
+                p1 = P[i]
+                p2 = P[j]
+    return p1, p2, shortest
+
+if __name__ == "__main__":
     testNum = int(input())
     shortestArr = []
     for i in range(testNum):
         ptNum = int(input())
-        app = App(ptNum)
-        app.inputCoordinate()
-        #quickSort(app.coordinate, 0, ptNum-1, 0)
-        sorted_pts = sorted(app.coordinate, key=lambda pt: pt[0])
-        shortestArr.append(app.devideTillBase(sorted_pts, ptNum))
-        #shortestArr.append(bruteForce(app.coordinate, ptNum))
+        P = [[0, 0] for _ in range(ptNum)]
+        for i in range(ptNum):
+            input_string = input()
+            try:
+                P[i][0] = float(input_string.split()[0])
+                P[i][1] = float(input_string.split()[1])
+            except ValueError:
+                print("Invalid input")
+        shortestArr.append(closest(P)[2])
     for i in range(testNum):
         print(shortestArr[i])
-    
-if __name__ == "__main__":
-    main()
